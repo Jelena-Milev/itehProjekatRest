@@ -285,6 +285,46 @@ Flight::route('PUT /novosti/@id', function($id){
 	}	
 });
 
+Flight::route('PUT /predstave/@id', function($id){
+	header ("Content-Type: application/json; charset=utf-8");
+	$db = Flight::db();
+	$podaci_json = Flight::get("json_podaci");
+	$podaci = json_decode ($podaci_json);
+	if ($podaci == null){
+	$odgovor["poruka"] = "Niste prosledili podatke";
+	$json_odgovor = json_encode ($odgovor);
+	echo $json_odgovor;
+	} else {
+	if (!property_exists($podaci,'naziv')||!property_exists($podaci,'zanr')||!property_exists($podaci,'trajanje')||!property_exists($podaci,'opis')){
+			$odgovor["poruka"] = "Niste prosledili korektne podatke";
+			$json_odgovor = json_encode ($odgovor,JSON_UNESCAPED_UNICODE);
+			echo $json_odgovor;
+			return false;
+	
+	} else {
+			$podaci_query = array();
+			foreach ($podaci as $k=>$v){
+				if($k != "trajanje"){
+					$v = "'".$v."'";
+				}
+				$podaci_query[$k] = $v;
+			}
+			if ($db->update("predstava", $id, array('naziv','zanr','trajanje','opis'),array($podaci->naziv, $podaci->zanr,$podaci->trajanje,$podaci->opis))){
+				$odgovor["poruka"] = "Predstava je uspešno izmenjena";
+				$json_odgovor = json_encode ($odgovor,JSON_UNESCAPED_UNICODE);
+				echo $json_odgovor;
+				return false;
+			} else {
+				$odgovor["poruka"] = "Došlo je do greške pri izmeni predstave";
+				$json_odgovor = json_encode ($odgovor,JSON_UNESCAPED_UNICODE);
+				echo $json_odgovor;
+                return false;
+			}
+	}
+	}	
+});
+
+
 Flight::route('PUT /kategorije/@id', function($id){
 	header ("Content-Type: application/json; charset=utf-8");
 	$db = Flight::db();
@@ -360,6 +400,23 @@ Flight::route('DELETE /kategorije/@id', function($id){
 
 });
 
+Flight::route('DELETE /predstave/@id', function($id){
+    header ("Content-Type: application/json; charset=utf-8");
+    $db = Flight::db();
+    if ($db->delete("predstava", array("id"),array($id))){
+            $odgovor["poruka"] = "Predstava je uspešno izbrisana";
+            $json_odgovor = json_encode ($odgovor,JSON_UNESCAPED_UNICODE);
+            echo $json_odgovor;
+            return false;
+    } else {
+            $odgovor["poruka"] = "Došlo je do greške prilikom brisanja predstave";
+            $json_odgovor = json_encode ($odgovor,JSON_UNESCAPED_UNICODE);
+            echo $json_odgovor;
+            return false;
+    
+    }		
+            
+});
 
 Flight::route('GET /novosti.json', function(){});
 Flight::route('GET /novosti/@id.json', function($id){});
