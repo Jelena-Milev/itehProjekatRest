@@ -53,9 +53,6 @@ Flight::route('GET /predstave/@id/@date.json', function($id, $date){
 	$red=$db->getResult()->fetch_object();
 	$sala = $red->salaId;
 	
-// 	SELECT id from sedista where id not in 
-// (select sediste from rezervacije where predstavaId = 56 and salaId = 2 and datum = "2020-02-25") and salaId = 2
-
 	$db_pomocna=new Database("rest");
 	$db_pomocna->select("sedista", "id", null, null, null, "id not in (select sediste from rezervacije where predstavaId = ".$id." and salaId =".$sala." and datum = '".$date."') and salaId = ".$sala, null);
 		
@@ -245,6 +242,47 @@ Flight::route('POST /predstave', function(){
 				return false;
 			} else {
 				$odgovor["poruka"] = "Došlo je do greške pri ubacivanju predstave";
+				$json_odgovor = json_encode ($odgovor,JSON_UNESCAPED_UNICODE);
+				echo $json_odgovor;
+				return false;
+			}
+	}
+	}	
+	}
+);
+
+Flight::route('POST /rezervacija', function(){
+	header ("Content-Type: application/json; charset=utf-8");
+	$db = Flight::db();
+	$podaci_json = Flight::get("json_podaci");
+	$podaci = json_decode ($podaci_json);
+	if ($podaci == null){
+	$odgovor["poruka"] = "Niste prosledili podatke";
+	$json_odgovor = json_encode ($odgovor);
+	echo $json_odgovor;
+	return false;
+	} else {
+	if (!property_exists($podaci,'korisnikId')||!property_exists($podaci,'predstavaId')||!property_exists($podaci,'salaId')||!property_exists($podaci,'sediste')||!property_exists($podaci,'datum')){
+			$odgovor["poruka"] = "Niste prosledili korektne podatke";
+			$json_odgovor = json_encode ($odgovor,JSON_UNESCAPED_UNICODE);
+			echo $json_odgovor;
+			return false;
+	
+	} else {
+			$podaci_query = array();
+            foreach ($podaci as $k=>$v){
+				if($k == "sediste" || $k == "datum"){
+					$v = "'".$v."'";
+				}
+				$podaci_query[$k] = $v;
+			}
+			if ($db->insert("rezervacije", "salaId, sediste, datum, predstavaId, korisnikId", array($podaci_query["salaId"], $podaci_query["sediste"], $podaci_query["datum"], $podaci_query["predstavaId"], $podaci_query["korisnikId"]))){
+				$odgovor["poruka"] = "Rezervacija je uspešno sačuvana";
+				$json_odgovor = json_encode ($odgovor,JSON_UNESCAPED_UNICODE);
+				echo $json_odgovor;
+				return false;
+			} else {
+				$odgovor["poruka"] = "Došlo je do greške pri čuvanju rezervacije";
 				$json_odgovor = json_encode ($odgovor,JSON_UNESCAPED_UNICODE);
 				echo $json_odgovor;
 				return false;
