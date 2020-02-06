@@ -45,6 +45,23 @@ Flight::route('GET /predstave/@id.json', function($id){
 	return false;
 });
 
+Flight::route('GET /izvodjenja/@id.json', function($id){
+	header ("Content-Type: application/json; charset=utf-8");
+	$db = Flight::db();
+	$db->select("izvodjenja", "DATE_FORMAT(datum, '%d. %M %Y.') as dat", null, null, null, "predstavaId = ".$id." and datum > NOW()", null);
+	$niz=array();
+	while ($red=$db->getResult()->fetch_object()){
+		$niz[] = $red;
+	}
+	//JSON_UNESCAPED_UNICODE parametar je uveden u PHP verziji 5.4
+	//Omogućava Unicode enkodiranje JSON fajla
+	//Bez ovog parametra, vrši se escape Unicode karaktera
+	//Na primer, slovo č će biti \u010
+    $json_niz = json_encode ($niz,JSON_UNESCAPED_UNICODE);
+	echo indent($json_niz);
+	return false;
+});
+
 Flight::route('GET /novosti.json', function(){
 	header ("Content-Type: application/json; charset=utf-8");
 	$db = Flight::db();
