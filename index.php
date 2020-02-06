@@ -45,10 +45,38 @@ Flight::route('GET /predstave/@id.json', function($id){
 	return false;
 });
 
+Flight::route('GET /predstave/@id/@date.json', function($id, $date){
+	header ("Content-Type: application/json; charset=utf-8");
+	$db = Flight::db();
+	$db->select("izvodjenja", "salaId", null, null, null, "predstavaId = ".$id." and datum = '".$date."'", null);
+
+	$red=$db->getResult()->fetch_object();
+	$sala = $red->salaId;
+	
+// 	SELECT id from sedista where id not in 
+// (select sediste from rezervacije where predstavaId = 56 and salaId = 2 and datum = "2020-02-25") and salaId = 2
+
+	$db_pomocna=new Database("rest");
+	$db_pomocna->select("sedista", "id", null, null, null, "id not in (select sediste from rezervacije where predstavaId = ".$id." and salaId =".$sala." and datum = '".$date."') and salaId = ".$sala, null);
+		
+	$niz=array();
+	while ($r=$db_pomocna->getResult()->fetch_object()){
+		$niz[] = $r;
+	}
+	
+	//JSON_UNESCAPED_UNICODE parametar je uveden u PHP verziji 5.4
+	//Omogućava Unicode enkodiranje JSON fajla
+	//Bez ovog parametra, vrši se escape Unicode karaktera
+	//Na primer, slovo č će biti \u010
+    $json_niz = json_encode ($niz,JSON_UNESCAPED_UNICODE);
+	echo indent($json_niz);
+	return false;
+});
+
 Flight::route('GET /izvodjenja/@id.json', function($id){
 	header ("Content-Type: application/json; charset=utf-8");
 	$db = Flight::db();
-	$db->select("izvodjenja", "DATE_FORMAT(datum, '%d. %M %Y.') as dat", null, null, null, "predstavaId = ".$id." and datum > NOW()", null);
+	$db->select("izvodjenja", "DATE_FORMAT(datum, '%d. %M %Y.') as formDatum, datum", null, null, null, "predstavaId = ".$id." and datum > NOW()", "datum");
 	$niz=array();
 	while ($red=$db->getResult()->fetch_object()){
 		$niz[] = $red;
