@@ -314,6 +314,45 @@ Flight::route('POST /rezervacija', function(){
 	}
 );
 
+Flight::route('POST /register', function(){
+	header ("Content-Type: application/json; charset=utf-8");
+	$db = Flight::db();
+	$podaci_json = Flight::get("json_podaci");
+	$podaci = json_decode ($podaci_json);
+	if ($podaci == null){
+	$odgovor["poruka"] = "Niste prosledili podatke";
+	$json_odgovor = json_encode ($odgovor);
+	echo $json_odgovor;
+	return false;
+	} else {
+	if (!property_exists($podaci,'username')||!property_exists($podaci,'password')||!property_exists($podaci,'fullName')||!property_exists($podaci,'email')||!property_exists($podaci,'status')){
+			$odgovor["poruka"] = "Niste prosledili korektne podatke";
+			$json_odgovor = json_encode ($odgovor,JSON_UNESCAPED_UNICODE);
+			echo $json_odgovor;
+			return false;
+	
+	} else {
+			$podaci_query = array();
+            foreach ($podaci as $k=>$v){
+				$v = "'".$v."'";
+				$podaci_query[$k] = $v;
+			}
+			if ($db->insert("korisnik", "username, password, imePrezime, email, status", array($podaci_query["username"], $podaci_query["password"], $podaci_query["fullName"], $podaci_query["email"], $podaci_query["status"]))){
+				$odgovor["poruka"] = "Korisnik je uspešno registrovan";
+				$json_odgovor = json_encode ($odgovor,JSON_UNESCAPED_UNICODE);
+				echo $json_odgovor;
+				return false;
+			} else {
+				$odgovor["poruka"] = "Došlo je do greške pri registraciji korisnika";
+				$json_odgovor = json_encode ($odgovor,JSON_UNESCAPED_UNICODE);
+				echo $json_odgovor;
+				return false;
+			}
+	}
+	}	
+	}
+);
+
 Flight::route('POST /kategorije', function(){
 	header ("Content-Type: application/json; charset=utf-8");
 	$db = Flight::db();
