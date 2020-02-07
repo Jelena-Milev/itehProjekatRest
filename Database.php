@@ -51,6 +51,23 @@ $this->ExecuteQuery($q);
 //print_r($this->getResult()->fetch_object());
 }
 
+function selectJoinTwice ($table="novosti", $rows = 'novosti.id, novosti.naslov, novosti.tekst, novosti.datumvreme, novosti.kategorija_id, 
+kategorije.kategorija', $join_table="kategorije", $join_key1="kategorija_id", $join_key2="id", $join_table2 = null, $join_key21 = null, $join_key22 = null,
+$where = null, $order = null)
+{
+$q = 'SELECT '.$rows.' FROM '.$table;  
+		if($join_table !=null)
+            $q .= ' JOIN '.$join_table.' ON '.$table.'.'.$join_key1.' = '.$join_table.'.'.$join_key2;
+        if($join_table2 !=null)
+			$q .= ' JOIN '.$join_table2.' ON '.$table.'.'.$join_key21.' = '.$join_table2.'.'.$join_key22;
+        if($where != null)  
+            $q .= ' WHERE '.$where;  
+        if($order != null)  
+            $q .= ' ORDER BY '.$order; 					
+$this->ExecuteQuery($q);
+//print_r($this->getResult()->fetch_object());
+}
+
 function insert ($table="novosti", $rows = "naslov, tekst", $values)
 {
 $query_values = implode(',',$values);
