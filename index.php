@@ -337,6 +337,25 @@ Flight::route('POST /register', function(){
 				$v = "'".$v."'";
 				$podaci_query[$k] = $v;
 			}
+
+			$db_pomocna=new Database("rest");
+			$db_pomocna->select("korisnik", "username, email", null, null, null, "korisnik.status = 'user'", null);
+			while ($r=$db_pomocna->getResult()->fetch_object()){
+				if($r->username == $podaci->username){
+					$odgovor["poruka"] = "Username vec postoji";
+					$json_odgovor = json_encode ($odgovor,JSON_UNESCAPED_UNICODE);
+					echo $json_odgovor;
+					return false;
+				}
+				if($r->email == $podaci->email){
+					$odgovor["poruka"] = "Email vec postoji";
+					$json_odgovor = json_encode ($odgovor,JSON_UNESCAPED_UNICODE);
+					echo $json_odgovor;
+					return false;
+				}
+			}
+			
+	
 			if ($db->insert("korisnik", "username, password, imePrezime, email, status", array($podaci_query["username"], $podaci_query["password"], $podaci_query["fullName"], $podaci_query["email"], $podaci_query["status"]))){
 				$odgovor["poruka"] = "Korisnik je uspešno registrovan";
 				$json_odgovor = json_encode ($odgovor,JSON_UNESCAPED_UNICODE);
@@ -577,4 +596,3 @@ Flight::route('DELETE /kategorije/@id', function($id){});
 
 
 Flight::start();
-?>
