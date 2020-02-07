@@ -48,7 +48,7 @@ Flight::route('GET /predstave/@id.json', function($id){
 Flight::route('GET /rezervacije/@id.json', function($id){
 	header ("Content-Type: application/json; charset=utf-8");
 	$db = Flight::db();
-	$db->selectJoinTwice("rezervacije", "DATE_FORMAT(rezervacije.datum, '%d. %M %Y.') as datum, predstava.naziv as naziv, sala.nazivSale as sala, rezervacije.sediste as sediste, predstava.trajanje as trajanje, predstava.zanr as zanr", 
+	$db->selectJoinTwice("rezervacije", "rezervacije.id, DATE_FORMAT(rezervacije.datum, '%d. %M %Y.') as datum, predstava.naziv as naziv, sala.nazivSale as sala, rezervacije.sediste as sediste, predstava.trajanje as trajanje, predstava.zanr as zanr", 
 	"predstava", "predstavaId", "id", "sala", "salaId", "id", 
 	"rezervacije.korisnikId = ".$id, "rezervacije.datum, rezervacije.sediste");
 	$niz=array();

@@ -40,6 +40,8 @@ $this->dblink->set_charset("utf8");
 function select ($table="novosti", $rows = 'novosti.id, novosti.naslov, novosti.tekst, novosti.datumvreme, novosti.kategorija_id, 
 kategorije.kategorija', $join_table="kategorije", $join_key1="kategorija_id", $join_key2="id", $where = null, $order = null)
 {
+    $q1 = "SET lc_time_names = 'sr_RS';";
+    $this->ExecuteQuery($q1);
 $q = 'SELECT '.$rows.' FROM '.$table;  
 		if($join_table !=null)
 			$q .= ' JOIN '.$join_table.' ON '.$table.'.'.$join_key1.' = '.$join_table.'.'.$join_key2;
@@ -55,6 +57,8 @@ function selectJoinTwice ($table="novosti", $rows = 'novosti.id, novosti.naslov,
 kategorije.kategorija', $join_table="kategorije", $join_key1="kategorija_id", $join_key2="id", $join_table2 = null, $join_key21 = null, $join_key22 = null,
 $where = null, $order = null)
 {
+    $q1 = "SET lc_time_names = 'sr_RS';";
+    $this->ExecuteQuery($q1);
 $q = 'SELECT '.$rows.' FROM '.$table;  
 		if($join_table !=null)
             $q .= ' JOIN '.$join_table.' ON '.$table.'.'.$join_key1.' = '.$join_table.'.'.$join_key2;
