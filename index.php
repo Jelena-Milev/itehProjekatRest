@@ -50,7 +50,7 @@ Flight::route('GET /rezervacije/@id.json', function($id){
 	header ("Content-Type: application/json; charset=utf-8");
 	$db = Flight::db();
 	test_input($id);
-	$db->selectJoinTwice("rezervacije", "rezervacije.id, DATE_FORMAT(rezervacije.datum, '%d. %M %Y.') as datum, predstava.naziv as naziv, sala.nazivSale as sala, rezervacije.sediste as sediste, predstava.trajanje as trajanje, predstava.zanr as zanr", 
+	$db->selectJoinTwice("rezervacije", "rezervacije.id, DATE_FORMAT(rezervacije.datum, '%d. %M %Y.') as datum, predstava.naziv as naziv, predstava.cena as cena, sala.nazivSale as sala, rezervacije.sediste as sediste, predstava.trajanje as trajanje, predstava.zanr as zanr", 
 	"predstava", "predstavaId", "id", "sala", "salaId", "id", 
 	"rezervacije.korisnikId = ".$id, "rezervacije.datum, rezervacije.sediste");
 	$niz=array();
@@ -265,7 +265,7 @@ Flight::route('POST /predstave', function(){
 	echo $json_odgovor;
 	return false;
 	} else {
-	if (!property_exists($podaci,'naziv')||!property_exists($podaci,'zanr')||!property_exists($podaci,'trajanje')||!property_exists($podaci,'opis')){
+	if (!property_exists($podaci,'naziv')||!property_exists($podaci,'zanr')||!property_exists($podaci,'trajanje')||!property_exists($podaci,'opis')||!property_exists($podaci,'cena')){
 			$odgovor["poruka"] = "Niste prosledili korektne podatke";
 			$json_odgovor = json_encode ($odgovor,JSON_UNESCAPED_UNICODE);
 			echo $json_odgovor;
@@ -275,12 +275,12 @@ Flight::route('POST /predstave', function(){
 			$podaci_query = array();
             foreach ($podaci as $k=>$v){
 				test_input($v);
-				if($k != "trajanje"){
+				if($k != "trajanje" || $k != "cena"){
 					$v = "'".$v."'";
 				}
 				$podaci_query[$k] = $v;
 			}
-			if ($db->insert("predstava", "naziv, zanr, trajanje, opis", array($podaci_query["naziv"], $podaci_query["zanr"], $podaci_query["trajanje"], $podaci_query["opis"]))){
+			if ($db->insert("predstava", "naziv, zanr, trajanje, opis, cena", array($podaci_query["naziv"], $podaci_query["zanr"], $podaci_query["trajanje"], $podaci_query["opis"], $podaci_query["cena"]))){
 				$odgovor["poruka"] = "Predstava je uspešno ubačena";
 				$json_odgovor = json_encode ($odgovor,JSON_UNESCAPED_UNICODE);
 				echo $json_odgovor;
@@ -486,7 +486,7 @@ Flight::route('PUT /predstave/@id', function($id){
 	$json_odgovor = json_encode ($odgovor);
 	echo $json_odgovor;
 	} else {
-	if (!property_exists($podaci,'naziv')||!property_exists($podaci,'zanr')||!property_exists($podaci,'trajanje')||!property_exists($podaci,'opis')){
+	if (!property_exists($podaci,'naziv')||!property_exists($podaci,'zanr')||!property_exists($podaci,'trajanje')||!property_exists($podaci,'opis') ||!property_exists($podaci,'cena')){
 			$odgovor["poruka"] = "Niste prosledili korektne podatke";
 			$json_odgovor = json_encode ($odgovor,JSON_UNESCAPED_UNICODE);
 			echo $json_odgovor;
@@ -496,12 +496,12 @@ Flight::route('PUT /predstave/@id', function($id){
 			$podaci_query = array();
 			foreach ($podaci as $k=>$v){
 				test_input($v);
-				if($k != "trajanje"){
+				if($k != "trajanje" || $k != "cena"){
 					$v = "'".$v."'";
 				}
 				$podaci_query[$k] = $v;
 			}
-			if ($db->update("predstava", $id, array('naziv','zanr','trajanje','opis'),array($podaci->naziv, $podaci->zanr,$podaci->trajanje,$podaci->opis))){
+			if ($db->update("predstava", $id, array('naziv','zanr','trajanje','opis','cena'),array($podaci->naziv, $podaci->zanr,$podaci->trajanje,$podaci->opis,$podaci->cena))){
 				$odgovor["poruka"] = "Predstava je uspešno izmenjena";
 				$json_odgovor = json_encode ($odgovor,JSON_UNESCAPED_UNICODE);
 				echo $json_odgovor;
