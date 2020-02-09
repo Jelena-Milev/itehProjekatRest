@@ -31,6 +31,7 @@ Flight::route('GET /predstave.json', function(){
 Flight::route('GET /predstave/@id.json', function($id){
 	header ("Content-Type: application/json; charset=utf-8");
 	$db = Flight::db();
+	test_input($id);
 	$db->select("predstava", "*", null, null, null, "predstava.id = ".$id, null);
 	$niz=array();
 	while ($red=$db->getResult()->fetch_object()){
@@ -48,6 +49,7 @@ Flight::route('GET /predstave/@id.json', function($id){
 Flight::route('GET /rezervacije/@id.json', function($id){
 	header ("Content-Type: application/json; charset=utf-8");
 	$db = Flight::db();
+	test_input($id);
 	$db->selectJoinTwice("rezervacije", "rezervacije.id, DATE_FORMAT(rezervacije.datum, '%d. %M %Y.') as datum, predstava.naziv as naziv, sala.nazivSale as sala, rezervacije.sediste as sediste, predstava.trajanje as trajanje, predstava.zanr as zanr", 
 	"predstava", "predstavaId", "id", "sala", "salaId", "id", 
 	"rezervacije.korisnikId = ".$id, "rezervacije.datum, rezervacije.sediste");
@@ -67,6 +69,7 @@ Flight::route('GET /rezervacije/@id.json', function($id){
 Flight::route('GET /rezervacija/@id.json', function($id){
 	header ("Content-Type: application/json; charset=utf-8");
 	$db = Flight::db();
+	test_input($id);
 	$db->selectJoinTwice("rezervacije", "rezervacije.id, DATE_FORMAT(rezervacije.datum, '%d. %M %Y.') as datum, predstava.naziv as naziv, sala.nazivSale as sala, rezervacije.sediste as sediste, predstava.trajanje as trajanje, predstava.zanr as zanr", 
 	"predstava", "predstavaId", "id", "sala", "salaId", "id", 
 	"rezervacije.korisnikId = ".$id, "rezervacije.datum, rezervacije.sediste");
@@ -86,6 +89,8 @@ Flight::route('GET /rezervacija/@id.json', function($id){
 Flight::route('GET /predstave/@id/@date.json', function($id, $date){
 	header ("Content-Type: application/json; charset=utf-8");
 	$db = Flight::db();
+	test_input($id);
+	test_input($date);
 	$db->select("izvodjenja", "salaId", null, null, null, "predstavaId = ".$id." and datum = '".$date."'", null);
 
 	$red=$db->getResult()->fetch_object();
@@ -111,6 +116,7 @@ Flight::route('GET /predstave/@id/@date.json', function($id, $date){
 Flight::route('GET /izvodjenja/@id.json', function($id){
 	header ("Content-Type: application/json; charset=utf-8");
 	$db = Flight::db();
+	test_input($id);
 	$db->select("izvodjenja", "DATE_FORMAT(datum, '%d. %M %Y.') as formDatum, datum", null, null, null, "predstavaId = ".$id." and datum > NOW()", "datum");
 	$niz=array();
 	while ($red=$db->getResult()->fetch_object()){
@@ -268,6 +274,7 @@ Flight::route('POST /predstave', function(){
 	} else {
 			$podaci_query = array();
             foreach ($podaci as $k=>$v){
+				test_input($v);
 				if($k != "trajanje"){
 					$v = "'".$v."'";
 				}
@@ -309,6 +316,7 @@ Flight::route('POST /rezervacija', function(){
 	} else {
 			$podaci_query = array();
             foreach ($podaci as $k=>$v){
+				test_input($v);
 				// if($k == "sediste" || $k == "datum"){
 				// 	$v = "'".$v."'";
 				// }
@@ -353,6 +361,7 @@ Flight::route('POST /register', function(){
 	} else {
 			$podaci_query = array();
             foreach ($podaci as $k=>$v){
+				test_input($v);
 				$v = "'".$v."'";
 				$podaci_query[$k] = $v;
 			}
@@ -486,6 +495,7 @@ Flight::route('PUT /predstave/@id', function($id){
 	} else {
 			$podaci_query = array();
 			foreach ($podaci as $k=>$v){
+				test_input($v);
 				if($k != "trajanje"){
 					$v = "'".$v."'";
 				}
@@ -584,7 +594,8 @@ Flight::route('DELETE /kategorije/@id', function($id){
 
 Flight::route('DELETE /predstave/@id', function($id){
     header ("Content-Type: application/json; charset=utf-8");
-    $db = Flight::db();
+	$db = Flight::db();
+	test_input($id);
     if ($db->delete("predstava", array("id"),array($id))){
             $odgovor["poruka"] = "Predstava je uspešno izbrisana";
             $json_odgovor = json_encode ($odgovor,JSON_UNESCAPED_UNICODE);
@@ -611,7 +622,11 @@ Flight::route('PUT /kategorije/@id', function($id){});
 Flight::route('DELETE /novosti/@id', function($id){});
 Flight::route('DELETE /kategorije/@id', function($id){});
 
-
+function test_input($data){
+	$data = trim($data);
+	$data = htmlspecialchars($data);
+	$data = stripslashes($data);
+}
 
 
 Flight::start();
