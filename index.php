@@ -64,6 +64,25 @@ Flight::route('GET /rezervacije/@id.json', function($id){
 	return false;
 });
 
+Flight::route('GET /rezervacija/@id.json', function($id){
+	header ("Content-Type: application/json; charset=utf-8");
+	$db = Flight::db();
+	$db->selectJoinTwice("rezervacije", "rezervacije.id, DATE_FORMAT(rezervacije.datum, '%d. %M %Y.') as datum, predstava.naziv as naziv, sala.nazivSale as sala, rezervacije.sediste as sediste, predstava.trajanje as trajanje, predstava.zanr as zanr", 
+	"predstava", "predstavaId", "id", "sala", "salaId", "id", 
+	"rezervacije.korisnikId = ".$id, "rezervacije.datum, rezervacije.sediste");
+	$niz=array();
+	while ($red=$db->getResult()->fetch_object()){
+		$niz[] = $red;
+	}
+	//JSON_UNESCAPED_UNICODE parametar je uveden u PHP verziji 5.4
+	//Omogućava Unicode enkodiranje JSON fajla
+	//Bez ovog parametra, vrši se escape Unicode karaktera
+	//Na primer, slovo č će biti \u010
+    $json_niz = json_encode ($niz,JSON_UNESCAPED_UNICODE);
+	echo indent($json_niz);
+	return false;
+});
+
 Flight::route('GET /predstave/@id/@date.json', function($id, $date){
 	header ("Content-Type: application/json; charset=utf-8");
 	$db = Flight::db();
